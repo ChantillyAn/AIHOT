@@ -1,27 +1,6 @@
 {
-  "$comment": "示范信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。之后在后台“信源”里增删改。字段说明见 docs/customize.md。",
+  "$comment": "学术站信源：首次启动时导入（scripts/seed.ts），已存在的不会被覆盖。清单与取舍见项目文档「学术站信源清单与收录标准」（2026-09-30）。FutureHouse（JS 渲染）和教育部工作动态（海外访问 403）要在服务器上试抓后再加。",
   "sources": [
-    {
-      "id": "rss-openai-news",
-      "name": "OpenAI News",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://openai.com/news/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": "openai",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
     {
       "id": "rss-google-deepmind",
       "name": "Google DeepMind",
@@ -29,16 +8,15 @@
       "config": {
         "feedUrl": "https://deepmind.google/blog/rss.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "google",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
@@ -50,39 +28,15 @@
       "config": {
         "feedUrl": "https://research.google/blog/rss/",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "google",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-hugging-face",
-      "name": "Hugging Face Blog",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://huggingface.co/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": "hugging-face",
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方",
-        "开源"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
@@ -94,186 +48,188 @@
       "config": {
         "feedUrl": "https://www.microsoft.com/en-us/research/feed/",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "microsoft",
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "研究"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-nvidia-blog",
-      "name": "NVIDIA Blog",
+      "id": "rss-openai-news",
+      "name": "OpenAI News",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://blogs.nvidia.com/feed/",
+        "feedUrl": "https://openai.com/news/rss.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T1",
       "first_party": true,
-      "owner_entity_id": "nvidia",
+      "participation_mode": "editorial",
+      "interval_minutes": 60,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-anthropic-research",
+      "name": "Anthropic Research",
+      "kind": "web_list",
+      "config": {
+        "url": "https://www.anthropic.com/research",
+        "itemSelector": "a[class*=\"PublicationList\"][class*=\"listItem\"]",
+        "titleSelector": "span[class*=\"__title\"]",
+        "publishedAtSelector": "time",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-meta-ai-blog",
+      "name": "Meta AI Blog",
+      "kind": "web_list",
+      "config": {
+        "url": "https://ai.meta.com/blog/",
+        "allowUrlPrefixes": [
+          "https://ai.meta.com/blog/"
+        ],
+        "detail": {
+          "titleSelector": "h1",
+          "titleAuthoritative": true
+        },
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-arc-institute",
+      "name": "Arc Institute",
+      "kind": "web_list",
+      "config": {
+        "url": "https://arcinstitute.org/news",
+        "itemSelector": "article[class*=\"postItem\"]",
+        "linkSelector": "h3 a",
+        "titleSelector": "h3",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-nature-machine-learning",
+      "name": "Nature · 机器学习主题",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/subjects/machine-learning.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-aws-ml",
-      "name": "AWS Machine Learning Blog",
+      "id": "rss-nature-machine-intelligence",
+      "name": "Nature Machine Intelligence",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://aws.amazon.com/blogs/machine-learning/feed/",
+        "feedUrl": "https://www.nature.com/natmachintell.rss",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
+      "first_party": false,
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "官方",
-        "教程"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-github-ai",
-      "name": "GitHub Blog · AI & ML",
+      "id": "rss-science-news",
+      "name": "Science 新闻",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://github.blog/ai-and-ml/feed/",
+        "feedUrl": "https://www.science.org/rss/news_current.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-mistral",
-      "name": "Mistral AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://mistral.ai/rss.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 120,
-      "tags": [
-        "官方"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-bair",
-      "name": "Berkeley AI Research",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://bair.berkeley.edu/blog/feed.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T1",
-      "first_party": true,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 180,
-      "tags": [
-        "研究"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-the-verge-ai",
-      "name": "The Verge · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
-        "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 60,
+      "interval_minutes": 120,
       "tags": [
-        "媒体"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-techcrunch-ai",
-      "name": "TechCrunch · AI",
+      "id": "rss-quanta",
+      "name": "Quanta Magazine",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://techcrunch.com/category/artificial-intelligence/feed/",
+        "feedUrl": "https://api.quantamagazine.org/feed/",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 60,
+      "interval_minutes": 120,
       "tags": [
-        "媒体"
-      ],
-      "site_fulltext": false,
-      "syndicate_fulltext": false
-    },
-    {
-      "id": "rss-ars-technica-ai",
-      "name": "Ars Technica · AI",
-      "kind": "rss",
-      "config": {
-        "feedUrl": "https://arstechnica.com/ai/feed/",
-        "_aihot": {
-          "initialBackfillLimit": 8
-        }
-      },
-      "tier": "T2",
-      "first_party": false,
-      "owner_entity_id": null,
-      "participation_mode": "editorial",
-      "interval_minutes": 60,
-      "tags": [
-        "媒体"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
@@ -285,58 +241,175 @@
       "config": {
         "feedUrl": "https://www.technologyreview.com/topic/artificial-intelligence/feed",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "媒体"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-the-decoder",
-      "name": "The Decoder",
+      "id": "rss-sciencedaily-ai",
+      "name": "ScienceDaily · AI",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://the-decoder.com/feed/",
+        "feedUrl": "https://www.sciencedaily.com/rss/computers_math/artificial_intelligence.xml",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 60,
+      "interval_minutes": 120,
       "tags": [
-        "媒体"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-simon-willison",
-      "name": "Simon Willison",
+      "id": "rss-new-scientist-tech",
+      "name": "New Scientist · 科技",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://simonwillison.net/atom/everything/",
+        "feedUrl": "https://www.newscientist.com/subject/technology/feed/",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
       "interval_minutes": 120,
       "tags": [
-        "个人"
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ieee-spectrum-ai",
+      "name": "IEEE Spectrum · AI",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://spectrum.ieee.org/feeds/topic/artificial-intelligence.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-scientific-american",
+      "name": "Scientific American",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.scientificamerican.com/platform/syndication/rss/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-asterisk",
+      "name": "Asterisk",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://asteriskmag.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-terence-tao",
+      "name": "Terence Tao",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://terrytao.wordpress.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-scott-aaronson",
+      "name": "Scott Aaronson",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://scottaaronson.blog/?feed=rss2",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-xena-project",
+      "name": "Kevin Buzzard · Xena",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://xenaproject.wordpress.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
@@ -348,38 +421,578 @@
       "config": {
         "feedUrl": "https://importai.substack.com/feed",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 180,
+      "interval_minutes": 360,
       "tags": [
-        "个人",
-        "周刊"
+        "前沿"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false
     },
     {
-      "id": "rss-latent-space",
-      "name": "Latent Space",
+      "id": "rss-asimov-press",
+      "name": "Asimov Press",
       "kind": "rss",
       "config": {
-        "feedUrl": "https://www.latent.space/feed",
+        "feedUrl": "https://www.asimov.press/feed",
         "_aihot": {
-          "initialBackfillLimit": 8
+          "initialBackfillLimit": 5
         }
       },
       "tier": "T2",
       "first_party": false,
-      "owner_entity_id": null,
       "participation_mode": "editorial",
-      "interval_minutes": 180,
+      "interval_minutes": 360,
       "tags": [
-        "个人"
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-epoch-ai",
+      "name": "Epoch AI",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://epochai.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-metr",
+      "name": "METR",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://metr.org/feed.xml",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "json-hf-daily-papers",
+      "name": "Hugging Face 每日论文",
+      "kind": "json_list",
+      "config": {
+        "url": "https://huggingface.co/api/daily_papers?limit=30",
+        "titlePaths": [
+          "paper.title",
+          "title"
+        ],
+        "summaryPaths": [
+          "paper.summary",
+          "summary"
+        ],
+        "publishedAtPath": "publishedAt",
+        "urlTemplate": "https://huggingface.co/papers/{paper.id}",
+        "externalIdPath": "paper.id",
+        "minNumeric": {
+          "path": "paper.upvotes",
+          "min": 15
+        },
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-qbitai",
+      "name": "量子位",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.qbitai.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-mit-sloan-edtech",
+      "name": "MIT Sloan 教学技术",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://mitsloanedtech.mit.edu/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-sussex-learning-matters",
+      "name": "苏塞克斯大学 Learning Matters",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://blogs.sussex.ac.uk/learning-matters/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-lse-impact",
+      "name": "LSE Impact Blog",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://blogs.lse.ac.uk/impactofsocialsciences/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-nature-research-management",
+      "name": "Nature · 科研管理",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/subjects/research-management.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-nature-careers",
+      "name": "Nature · 职业",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/subjects/careers.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-scholarly-kitchen",
+      "name": "Scholarly Kitchen",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://scholarlykitchen.sspnet.org/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-inside-higher-ed",
+      "name": "Inside Higher Ed",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.insidehighered.com/rss.xml",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-faculty-focus",
+      "name": "Faculty Focus",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.facultyfocus.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-one-useful-thing",
+      "name": "One Useful Thing",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.oneusefulthing.org/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-leon-furze",
+      "name": "Leon Furze",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://leonfurze.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-rhetorica",
+      "name": "Rhetorica",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://marcwatkins.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-research-whisperer",
+      "name": "Research Whisperer",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://researchwhisperer.org/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-patter",
+      "name": "Patter",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://patthomson.net/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-google-labs",
+      "name": "Google Labs",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://blog.google/technology/google-labs/rss/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-effortless-academic",
+      "name": "Effortless Academic",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://effortlessacademic.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-eval-academy",
+      "name": "Eval Academy",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://academy.evalcommunity.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-oldaily",
+      "name": "OLDaily",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.downes.ca/news/OLDaily.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-educating-ai",
+      "name": "Educating AI",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://nickpotkalitsky.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ai-edu-simplified",
+      "name": "AI + Education = Simplified",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://aiedusimplified.substack.com/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-agile-learning",
+      "name": "Agile Learning",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://derekbruff.org/?feed=rss2",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-jon-dron",
+      "name": "Jon Dron",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://jondron.ca/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 360,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "web-wharton-gail",
+      "name": "Wharton 生成式 AI 实验室",
+      "kind": "web_list",
+      "config": {
+        "url": "https://gail.wharton.upenn.edu/research-and-insights/",
+        "itemSelector": "a.vc_btn",
+        "allowUrlPrefixes": [
+          "https://gail.wharton.upenn.edu/research-and-insights/"
+        ],
+        "detail": {
+          "titleSelector": "h1",
+          "titleAuthoritative": true
+        },
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 720,
+      "tags": [
+        "实践"
       ],
       "site_fulltext": false,
       "syndicate_fulltext": false

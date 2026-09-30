@@ -25,6 +25,7 @@ import {
   needsShortTweetTranslation, parseTranslateOutput, PREFILTER_SYSTEM, prefilterUser, translateInputOf, UNDERSTAND_SYSTEM, understandUser,
   type IdentityGuard,
 } from "./writing.ts";
+import { checkLayout, type Layout } from "./layout.ts";
 import { CATEGORY_BY_ITEM_TYPE, CATEGORY_GUIDE, CATEGORY_TAGS, ENTITIES, ENTITY_TAGS, ITEM_TYPES, normalizeTags, TOPIC_TAGS } from "./vocabulary.ts";
 import { promptText, promptVersion } from "./prompts.ts";
 
@@ -134,6 +135,13 @@ const UnderstandSchema = z.object({
   editorialJudgment: z.string().max(400).catch(""),
   titleZh: z.string().trim().min(1).max(200),
   summaryZh: z.string().trim().min(1).max(4000),
+  // The two-column layout (layout.ts checks every one; a bad field is dropped, not the whole reply).
+  section: z.enum(["frontier", "practice"]).nullable().catch(null),
+  mark: z.string().max(200).catch(""),
+  take: z.string().max(400).catch(""),
+  nameZh: z.string().max(200).catch(""),
+  lineZh: z.string().max(400).catch(""),
+  keywords: z.array(z.string()).max(30).catch([]),
 });
 
 const SummarizeSchema = z.object({ titleZh: z.string(), summaryZh: z.string(), bodyZh: z.string() });
@@ -168,6 +176,7 @@ export interface AnalysisRun {
     itemType?: string;
     authorRole?: string;
     identityGuard?: IdentityGuard;
+    layout?: Layout;
     receiptIds: number[];
     reused: boolean;
   } | null;
@@ -293,6 +302,7 @@ async function runUnderstand(a: AnalyzeInputArticle, opts: StepOpts): Promise<An
     kind: "understand", model: res.model, titleZh: copy.titleZh, summaryZh: copy.summaryZh, reasonZh: d.editorialJudgment.trim() || null,
     tags: normalizeTags(d.tags, { fallbackCategory: CATEGORY_BY_ITEM_TYPE[d.itemType] }), itemType: d.itemType, authorRole: d.authorRole,
     identityGuard: copy.identityGuard, receiptIds: [res.receiptId], reused: res.reused,
+    layout: checkLayout(d, copy.titleZh, [a.title, a.excerpt, a.bodyText].filter(Boolean).join("\n")),
   };
 }
 
@@ -432,6 +442,7 @@ export async function analyzeArticle(articleId: string, opts: StepOpts = {}): Pr
     scores: out.scores, scoreModel: out.scoreModel, threshold: out.threshold, ...(out.scoreRefused ? { scoreRefused: true } : {}),
     ...(w ? { writer: w.kind, writerModel: w.model, itemType: w.itemType ?? null, authorRole: w.authorRole ?? null } : {}),
     ...(w?.identityGuard?.outcome === "fallback" ? { identityGuard: w.identityGuard } : {}),
+    ...(w?.layout ? { layout: w.layout } : {}),
     fact: out.fact,
   };
   const committed = await sql.begin(async (tx) => {
