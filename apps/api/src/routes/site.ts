@@ -7,6 +7,7 @@ import { InvalidCursorError } from "@aihot/backend/lib/cursor";
 import { exportMarkdown, loadItemDetail, siteItemDetail } from "@aihot/backend/publication/detail";
 import { loadPool, SearchBusyError } from "@aihot/backend/publication/pool";
 import { loadTimeline } from "@aihot/backend/publication/timeline";
+import { loadSciHome } from "@aihot/backend/publication/sci";
 import { loadStoryFollowups } from "@aihot/backend/publication/followups";
 import { loadDevelopments, loadGroupReports } from "@aihot/backend/publication/groups";
 import { loadTopicTags } from "@aihot/backend/publication/topics";
@@ -85,6 +86,13 @@ export function registerSite(app: FastifyInstance) {
   }));
 
   if (FEATURES.codexResetMonitor) registerCodexReset(app);
+
+  // The academic homepage: the newest items of the two columns with their layout fields.
+  app.get("/api/site/sci", siteHandler(async (req, reply) => {
+    const data = await loadSciHome(60);
+    const { generatedAt: _, ...content } = data;
+    return sendJsonWithEtag(req, reply, data, { etagPrefix: "sci", cacheControl: "public, max-age=60, s-maxage=60", etagOf: content });
+  }));
 
   app.get("/api/site/timeline", siteHandler(async (req, reply) => {
     const q = looseQuery(req);
