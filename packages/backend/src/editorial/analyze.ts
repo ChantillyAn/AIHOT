@@ -386,7 +386,11 @@ export function normalizeAnalysis(run: AnalysisRun) {
   const values = run.scores && !run.scores.refused ? run.scores.values : null;
   const sum = values?.length === SCORE_CALLS ? values.reduce((total, v) => total + v, 0) : null;
   const score = sum === null ? null : Math.floor(sum / SCORE_CALLS);
-  const threshold = run.scores?.threshold ?? null;
+  const category = run.writing?.layout?.section ?? run.structure?.category ?? null;
+  // A column may ask for more than the tier does (industry/selection.ts columnFloor): the higher bar applies.
+  const tierBar = run.scores?.threshold ?? null;
+  const columnBar = category ? (SELECTION.columnFloor as Record<string, number>)[category] ?? null : null;
+  const threshold = tierBar === null ? null : Math.max(tierBar, columnBar ?? 0);
   const selected = relevance === "pass" && sum !== null && threshold !== null && sum >= threshold * SCORE_CALLS;
   const subjects = run.structure?.subjects ?? [];
   const tags = [...(run.writing?.tags ?? run.structure?.tags ?? [])];
@@ -404,7 +408,7 @@ export function normalizeAnalysis(run: AnalysisRun) {
     threshold,
     // The column: the understanding step reads the whole piece against the two columns' full rules, and its
     // layout fields are written for that column, so its choice wins; the structure step's guess is the fallback.
-    category: run.writing?.layout?.section ?? run.structure?.category ?? null,
+    category,
     tags,
     subjects,
     titleZh,

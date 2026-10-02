@@ -23,8 +23,8 @@ const X_SOURCE = `test-analyze-x-${T}`;
 type Step = "prefilter" | "score" | "understand" | "summarize" | "structure";
 interface Req { step: Step; marker: string; system: string; user: string; body: Record<string, any> }
 const requests: Req[] = [];
-const MARKERS = ["CLEAR", "RESCUE", "LOW", "OFFTOPIC", "BARE", "VAGUE", "THIN", "SENSITIVE", "推文"];
-const scoreAnswers: Record<string, number[]> = { CLEAR: [78, 72], RESCUE: [41, 39], LOW: [36, 34], THIN: [70, 70], SENSITIVE: [80, 80], 推文: [34, 34], BARE: [30, 34], VAGUE: [60, 62] };
+const MARKERS = ["CLEAR", "EDGE", "RESCUE", "LOW", "OFFTOPIC", "BARE", "VAGUE", "THIN", "SENSITIVE", "推文"];
+const scoreAnswers: Record<string, number[]> = { CLEAR: [78, 72], EDGE: [49, 47], RESCUE: [41, 39], LOW: [36, 34], THIN: [70, 70], SENSITIVE: [80, 80], 推文: [34, 34], BARE: [30, 34], VAGUE: [60, 62] };
 
 const stepOf = (system: string, user: string): Step =>
   system.includes("宽召回的相关性预筛") ? "prefilter" : system.includes("事件注意力评分器") ? "score"
@@ -123,6 +123,11 @@ test("a near-selected item is written like a selected one; below the floor it is
   assert.equal(summarize.body.messages.length, 1, "the title/summary prompt is one user message");
   assert.equal(summarize.body.response_format, undefined, "answered in its own text format");
   assert.deepEqual((await row(lowId)).tags, ["研究进展", "数学", "Anthropic"], "structure tags");
+});
+
+test("学术前沿 asks more than the tier: a frontier item at 48 passes T1 (42) but not the column floor (53)", async () => {
+  const edge = await analyzeArticle(await article("EDGE"));
+  assert.deepEqual([edge!.output!.category, edge!.output!.score, edge!.output!.threshold, edge!.output!.selected], ["frontier", 48, 53, false]);
 });
 
 test("the prefilter's BLOCK stops everything; UNKNOWN goes on like PASS", async () => {

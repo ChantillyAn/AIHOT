@@ -15,4 +15,9 @@ export const SELECTION = {
    * 其余用更便宜的“标题摘要翻译”。
    */
   understandFloor: 38,
+  /**
+   * 栏目的最低门槛（平均分）：和信源门槛取较高的一个。学术前沿的 AI 方法、模型发布和行业研究在
+   * 42–52 分扎堆（2026-10-02 重判后实测），学术实践的好文章多在 45–60 分，所以只给前沿加一道 53。
+   */
+  columnFloor: { frontier: 53 } as Record<string, number>,
 } as const;
