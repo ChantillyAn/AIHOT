@@ -45,6 +45,21 @@ export function numbersSupported(line: string, source: string): boolean {
   return nums.every((n) => hay.includes(n.replace(/,(?=\d{3}\b)/g, "")));
 }
 
+const NOT_SAID = /(原文|文中|文章)?(未|没有)(提及|说明|详述|披露|给出|提供|涉及)/;
+
+/**
+ * The take states the finding and the limit itself, not what "the source" said or left out: a clause about what the
+ * source does not mention is cut (a reader cannot do anything with it), and "原文指出" becomes a plain statement.
+ */
+export function plainTake(take: string): string {
+  let t = take.replace(/(，|,)?\s*但(原文|文中|文章)(指出|强调|提醒|表示|称|提到|也指出)?/g, "，但").replace(/^(原文|文中)(指出|强调|称)/, "");
+  if (NOT_SAID.test(t)) {
+    const cut = t.search(/[，,；;]\s*(但|不过|然而)/);
+    t = cut > 0 && !NOT_SAID.test(t.slice(0, cut)) ? `${t.slice(0, cut)}。` : "";
+  }
+  return t.replace(/，，/g, "，").replace(/^，/, "").trim();
+}
+
 /**
  * Checks and trims what the model wrote. `titleZh` is the title actually published (after the identity
  * guard); `source` is the original text the item was written from (title, excerpt, body).
@@ -52,7 +67,7 @@ export function numbersSupported(line: string, source: string): boolean {
 export function checkLayout(draft: LayoutDraft, titleZh: string, source: string): Layout {
   const section = draft.section === "frontier" || draft.section === "practice" ? draft.section : null;
   let mark = str(draft.mark).replace(EDGE_PUNCT, "");
-  let take = str(draft.take);
+  let take = plainTake(str(draft.take));
   let nameZh = str(draft.nameZh);
   let lineZh = str(draft.lineZh);
 

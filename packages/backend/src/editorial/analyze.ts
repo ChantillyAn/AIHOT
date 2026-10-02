@@ -402,7 +402,9 @@ export function normalizeAnalysis(run: AnalysisRun) {
     scoreModel: run.scores?.model ?? null,
     scoreRefused: run.scores?.refused ?? false,
     threshold,
-    category: run.structure?.category ?? null,
+    // The column: the understanding step reads the whole piece against the two columns' full rules, and its
+    // layout fields are written for that column, so its choice wins; the structure step's guess is the fallback.
+    category: run.writing?.layout?.section ?? run.structure?.category ?? null,
     tags,
     subjects,
     titleZh,

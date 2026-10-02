@@ -34,3 +34,11 @@ test("widths and numbers", () => {
   assert.ok(numbersSupported("约 1,000 人", "about 1000 people"));
   assert.ok(!numbersSupported("约 2000 人", "about 1000 people"));
 });
+
+test("take: states the limit itself, never what the source left out", async () => {
+  const { plainTake } = await import("../packages/backend/src/editorial/layout.ts");
+  assert.equal(plainTake("构建验证契约并演化互补启发式，但原文未说明具体基准测试表现。"), "构建验证契约并演化互补启发式。");
+  assert.equal(plainTake("解码精度大幅提升，但原文指出仍需更多数据。"), "解码精度大幅提升，但仍需更多数据。");
+  assert.equal(plainTake("能提前半小时预警，但尚需电力公司验证。"), "能提前半小时预警，但尚需电力公司验证。");
+  assert.equal(plainTake("原文未提及任何限制。"), "");
+});

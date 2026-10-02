@@ -39,3 +39,21 @@ test("practice: name and line from the model, line falls back; no layout at all 
   const bare = toSciItem({ ...base, category: "practice", summary: null, tags: [], url: "not a url", layout: null });
   assert.deepEqual([bare.name, bare.line, bare.take, bare.host, bare.kw, bare.sum], ["", "", "", "", "", ""]);
 });
+
+test("one event across both columns: the newest report stays, publisher names never merge items", async () => {
+  const { dedupeEvents, eventNames } = await import("../packages/backend/src/publication/sci.ts");
+  assert.deepEqual(eventNames("DeepMind发布SynthID Bio：AI生成蛋白质的水印技术"), ["synthidbio"]);
+  assert.deepEqual(eventNames("Nature MI：分钟级训练微型机器人导航策略"), []);
+  assert.deepEqual(eventNames("Import AI 469：DiG-bench 基准"), ["digbench"]);
+  const row = (id: string, category: "frontier" | "practice", title: string, t: number, story_id: string | null = null) =>
+    ({ id, category, title, summary: "", url: "", tags: [], layout: null, story_id, sort_at: new Date(t) });
+  const rows = [
+    row("a", "frontier", "DeepMind发布SynthID Bio：AI生成蛋白质的水印技术", 3),
+    row("b", "practice", "DeepMind 开发 SynthIDBio 为 AI 蛋白加隐形水印", 2),
+    row("c", "frontier", "Nature MI：分钟级训练微型机器人导航策略", 1),
+    row("d", "frontier", "Nature MI：多任务神经网络涌现模块化", 0),
+    row("e", "practice", "某大学的课堂规定", 5, "s1"),
+    row("f", "frontier", "另一家媒体的同一报道", 4, "s1"),
+  ];
+  assert.deepEqual(dedupeEvents(rows).map((r) => r.id), ["a", "c", "d", "e"]);
+});
