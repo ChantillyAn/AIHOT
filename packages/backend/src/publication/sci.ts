@@ -90,9 +90,11 @@ async function column(section: SciSection, limit: number, now: Date): Promise<Ro
     LIMIT ${limit}`;
 }
 
-// Names that say who published, not what happened: they never make two items the same event.
+// Names that say who published, not what happened, and method words many papers share
+// ("基于 LoRA 的…" and "LoRA 修复…" are different work): they never make two items the same event.
 const NOT_EVENT = new Set(["ai", "llm", "llms", "gpt", "chatgpt", "claude", "gemini", "openai", "anthropic", "google", "deepmind",
-  "meta", "microsoft", "nature", "science", "mit", "mi", "arc", "agi", "ml", "api", "import", "scholarly", "kitchen", "research", "lab"]);
+  "meta", "microsoft", "nature", "science", "mit", "mi", "arc", "agi", "ml", "api", "import", "scholarly", "kitchen", "research", "lab",
+  "lora", "transformer", "transformers", "arxiv", "agent", "agents"]);
 
 /**
  * The distinctive Latin names in a title (SynthID Bio → "synthidbio"), the clue that two items from different
@@ -110,18 +112,70 @@ export function eventNames(title: string): string[] {
   return [...out];
 }
 
+const squash = (s: string) => s.toLowerCase().replace(/[\s\-.·]+/g, "");
+const HAN = /[一-鿿]/;
+
+/** The words the model wrote about an item (its keywords and tags), lower case, entity markers left out. */
+function keywordTokens(r: Row): Set<string> {
+  const kw = Array.isArray(r.layout?.keywords) ? (r.layout!.keywords as unknown[]).map(str) : [];
+  return new Set([...kw, ...(r.tags ?? [])].join(" ").toLowerCase().split(/\s+/).filter((t) => t && !t.startsWith("entity:")));
+}
+
+function jaccard(a: Set<string>, b: Set<string>): number {
+  let both = 0;
+  for (const t of a) if (b.has(t)) both += 1;
+  return both / Math.max(1, a.size + b.size - both);
+}
+
+/**
+ * Two reports of one event whose titles do not share a Latin name: a Chinese title and an English one
+ * (纳维-斯托克斯 / Navier-Stokes), or two Chinese titles. Either the English name in one title is among the
+ * other's keywords, or both titles carry the same rare keyword (in no third title); in both cases the two
+ * keyword lists must also overlap, so a shared method word alone ("Perturb-seq", "同行评审") merges nothing.
+ */
+function sameEventByWords(a: Row, b: Row, titleCount: (term: string) => number): boolean {
+  const ka = keywordTokens(a), kb = keywordTokens(b);
+  const overlap = jaccard(ka, kb);
+  if (overlap >= 0.3) {
+    const kwA = squash([...ka].join(" ")), kwB = squash([...kb].join(" "));
+    if (eventNames(a.title).some((n) => kwB.includes(n)) || eventNames(b.title).some((n) => kwA.includes(n))) return true;
+  }
+  if (overlap >= 0.2) {
+    const ta = squash(a.title), tb = squash(b.title);
+    for (const t of ka) {
+      if (!kb.has(t)) continue;
+      const s = squash(t);
+      if (NOT_EVENT.has(s) || s.length < (HAN.test(s) ? 3 : 6)) continue;
+      if (ta.includes(s) && tb.includes(s) && titleCount(s) <= 2) return true;
+    }
+  }
+  return false;
+}
+
 /** One item per event across both columns: the newest report stays, in whichever column it was put. */
 export function dedupeEvents(rows: Row[]): Row[] {
-  const seen = new Set<string>();
   const ordered = [...rows].sort((a, b) => (b.sort_at?.getTime() ?? 0) - (a.sort_at?.getTime() ?? 0));
-  const kept = new Set<Row>();
-  for (const r of ordered) {
-    const keys = [...(r.story_id ? [`story:${r.story_id}`] : []), ...eventNames(r.title).map((k) => `name:${k}`)];
-    if (keys.some((k) => seen.has(k))) continue;
-    keys.forEach((k) => seen.add(k));
-    kept.add(r);
-  }
-  return rows.filter((r) => kept.has(r));
+  const titles = rows.map((r) => squash(r.title));
+  const titleCount = (term: string) => titles.filter((t) => t.includes(term)).length;
+  // Reports join one event through any chain of matches (A~B, B~C: one event even when A and C share
+  // nothing), then the newest of each event stays.
+  const parent = ordered.map((_, i) => i);
+  const root = (i: number): number => (parent[i] === i ? i : (parent[i] = root(parent[i])));
+  const join = (i: number, j: number) => { const a = root(i), b = root(j); if (a !== b) parent[Math.max(a, b)] = Math.min(a, b); };
+  const byKey = new Map<string, number>();
+  ordered.forEach((r, i) => {
+    for (const k of [...(r.story_id ? [`story:${r.story_id}`] : []), ...eventNames(r.title).map((n) => `name:${n}`)]) {
+      const first = byKey.get(k);
+      if (first === undefined) byKey.set(k, i);
+      else join(first, i);
+    }
+  });
+  for (let i = 0; i < ordered.length; i += 1)
+    for (let j = i + 1; j < ordered.length; j += 1)
+      if (root(i) !== root(j) && sameEventByWords(ordered[i]!, ordered[j]!, titleCount)) join(i, j);
+  // The smallest index of a group is its newest report, and every root is the smallest index of its group.
+  const keep = new Set(ordered.filter((_, i) => root(i) === i));
+  return rows.filter((r) => keep.has(r));
 }
 
 /** Five per column on the homepage; up to `limit` per column for the column pages, the flip deck and search. */

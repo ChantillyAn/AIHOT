@@ -57,3 +57,23 @@ test("one event across both columns: the newest report stays, publisher names ne
   ];
   assert.deepEqual(dedupeEvents(rows).map((r) => r.id), ["a", "c", "d", "e"]);
 });
+
+test("one event under a Chinese and an English name, or a rare shared word; method words never merge", async () => {
+  const { dedupeEvents } = await import("../packages/backend/src/publication/sci.ts");
+  const row = (id: string, title: string, kw: string, t: number, category: "frontier" | "practice" = "frontier") =>
+    ({ id, category, title, summary: "", url: "", tags: [], layout: { keywords: kw.split(" ") }, story_id: null, sort_at: new Date(t) });
+  const ns = "OpenAI 纳维-斯托克斯方程 Navier-Stokes 千禧年难题 流体力学 数学证明 数学";
+  const rows = [
+    row("en", "专家质疑 OpenAI 未解决真正的 Navier-Stokes 问题", "Navier-Stokes OpenAI 千禧年难题 数学证明 流体力学 质疑 数学", 9),
+    row("zh1", "OpenAI 发布纳维-斯托克斯方程 AI 解法", ns, 8),
+    row("zh2", "OpenAI 称 AI 破解纳维-斯托克斯方程", `${ns} 湍流 奇点`, 7),
+    row("m1", "Downes：生成式 AI 是元工具而非普通工具", "生成式 元工具 认知再分配 Ungrading 现象/趋势 教育评价", 6, "practice"),
+    row("m2", "Jon Dron谈生成式AI：它是元工具而非人类伙伴", "生成式AI 元工具 认知再分配 Ungrading 现象/趋势 人机关系", 5, "practice"),
+    row("l1", "B-BiLO：基于LoRA的双层算子学习用于PDE反问题", "LoRA 算子学习 PDE 不确定性量化", 4),
+    row("l2", "LoRA 修复 Transformer 过早停止思考问题", "LoRA Transformer 推理 微调", 3),
+    row("p1", "Silverchair高管谈AI时代同行评审的三角困境", "同行评审 出版 AI 治理 现象/趋势 学术出版", 2, "practice"),
+    row("p2", "学者谈同行评审容量：AI 冲击下的尴尬真相", "同行评审 出版 AI 容量 现象/趋势 学术出版", 1, "practice"),
+    row("p3", "同行评审是否因熟悉度而抑制创新？", "同行评审 创新 熟悉度 研究评价", 0, "practice"),
+  ];
+  assert.deepEqual(dedupeEvents(rows).map((r) => r.id), ["en", "m1", "l1", "l2", "p1", "p2", "p3"]);
+});
