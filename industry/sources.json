@@ -195,6 +195,90 @@
       "syndicate_fulltext": false
     },
     {
+      "id": "rss-nature-computational-science",
+      "name": "Nature Computational Science",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.nature.com/natcomputsci.rss",
+        "_aihot": {
+          "initialBackfillLimit": 5
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-science-advances",
+      "name": "Science Advances",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.science.org/action/showFeed?type=etoc&feed=rss&jc=sciadv",
+        "_aihot": {
+          "initialBackfillLimit": 5,
+          "initialBackfillMonths": 1
+        }
+      },
+      "tier": "T1",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-ai2-blog",
+      "name": "Ai2 博客",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://allenai.org/rss.xml",
+        "_aihot": {
+          "initialBackfillLimit": 5,
+          "initialBackfillMonths": 3
+        },
+        "sortByPublishedAt": true
+      },
+      "tier": "T1",
+      "first_party": true,
+      "participation_mode": "editorial",
+      "interval_minutes": 240,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
+      "id": "rss-physics-world",
+      "name": "Physics World",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://physicsworld.com/feed/",
+        "_aihot": {
+          "initialBackfillLimit": 5,
+          "initialBackfillMonths": 1
+        }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "前沿"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false
+    },
+    {
       "id": "rss-science-news",
       "name": "Science 新闻",
       "kind": "rss",
@@ -678,6 +762,34 @@
         "_aihot": {
           "initialBackfillLimit": 5
         }
+      },
+      "tier": "T2",
+      "first_party": false,
+      "participation_mode": "editorial",
+      "interval_minutes": 120,
+      "tags": [
+        "实践"
+      ],
+      "site_fulltext": false,
+      "syndicate_fulltext": false,
+      "enabled": false
+    },
+    {
+      "id": "rss-inside-higher-ed-ai",
+      "name": "Inside Higher Ed · AI",
+      "kind": "rss",
+      "config": {
+        "feedUrl": "https://www.insidehighered.com/taxonomy/term/596/feed",
+        "_aihot": {
+          "initialBackfillLimit": 5,
+          "initialBackfillMonths": 1
+        },
+        "sortByPublishedAt": true,
+        "denyUrlPrefixes": [
+          "https://www.insidehighered.com/news/2022/",
+          "https://www.insidehighered.com/news/tech-innovation/artificial-intelligence/2023/",
+          "https://www.insidehighered.com/news/faculty/teaching/2023/"
+        ]
       },
       "tier": "T2",
       "first_party": false,

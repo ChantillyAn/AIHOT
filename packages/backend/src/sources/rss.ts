@@ -34,14 +34,22 @@ function arr<T>(v: T | T[] | undefined | null): T[] {
   return Array.isArray(v) ? v : [v];
 }
 
-function parseDate(v: string): Date | null {
+export function parseDate(v: string): Date | null {
   if (!v) return null;
   const t = Date.parse(v);
   if (Number.isFinite(t)) return new Date(t);
   // RFC 822 variants with Chinese weekday or odd zones
   const cleaned = v.replace(/星期[一二三四五六日天]/, "").replace(/\s+/g, " ").trim();
   const t2 = Date.parse(cleaned);
-  return Number.isFinite(t2) ? new Date(t2) : null;
+  if (Number.isFinite(t2)) return new Date(t2);
+  // Drupal feeds (Inside Higher Ed's older items): "Tue, 02/21/2023 - 02:00 PM", no zone.
+  const m = cleaned.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})\s*-\s*(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+  if (!m) return null;
+  let hour = Number(m[4]) % 12;
+  if ((m[6] ?? "").toUpperCase() === "PM") hour += 12;
+  else if (!m[6]) hour = Number(m[4]);
+  const t3 = Date.UTC(Number(m[3]), Number(m[1]) - 1, Number(m[2]), hour, Number(m[5]));
+  return Number.isFinite(t3) ? new Date(t3) : null;
 }
 
 function atomLink(links: unknown): string {
