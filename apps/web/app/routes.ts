@@ -7,7 +7,10 @@ export default [
   route("all", "routes/all.tsx"),
   route("all/search-busy", "routes/search-busy.tsx", { id: "all-search-busy" }),
   route("search-busy", "routes/search-busy.tsx", { id: "search-busy" }),
-  route("items/:id", "routes/item.tsx"),
+  route("search", "routes/sci-search.tsx"),
+  route("items/:id", "routes/sci-item.tsx"),
+  // AIHOT 原来的条目页，学术站导读页上线后保留在这里（/feed 时间线仍可用）。
+  route("feed/items/:id", "routes/item.tsx", { id: "feed-item" }),
   route("items/:id/original", "routes/item-original.tsx", { id: "item-original" }),
   route("hot", "routes/hot.tsx"),
   route("story/:publicId", "routes/story.tsx"),

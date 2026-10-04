@@ -19,6 +19,30 @@ export interface SciItem {
   name: string;
   line: string;
   kw: string;
+  /** The source's publication day (Asia/Shanghai, YYYY-MM-DD), or "" when unknown. */
+  date: string;
+}
+
+/** One item on its own page: the homepage fields plus what only the page shows. */
+export interface SciItemFull extends SciItem {
+  originalTitle: string;
+  reason: string;
+  source: string;
+  keywords: string[];
+}
+
+export interface SciItemPage {
+  item: SciItemFull;
+  /** Every report of the same event, oldest first, this one included (empty when it stands alone). */
+  timeline: SciItem[];
+  /** The newest items of the same column, the event left out. */
+  latest: SciItem[];
+}
+
+export interface SciSearch {
+  q: string;
+  items: SciItem[];
+  generatedAt: string;
 }
 
 export interface SciHome {
@@ -37,6 +61,10 @@ interface Row {
   layout: Record<string, unknown> | null;
   story_id?: string | null;
   sort_at?: Date;
+  published_at?: Date | null;
+  original_title?: string | null;
+  reason?: string | null;
+  source_name?: string | null;
 }
 
 const str = (v: unknown) => (typeof v === "string" ? v.trim() : "");
@@ -77,14 +105,22 @@ export function toSciItem(r: Row): SciItem {
     name,
     line,
     kw: [...keywords, ...(r.tags ?? [])].join(" "),
+    date: day(r.published_at ?? r.sort_at ?? null),
   };
+}
+
+/** A calendar day as readers in China see it. */
+function day(d: Date | null): string {
+  if (!d || Number.isNaN(d.getTime())) return "";
+  return new Date(d.getTime() + 8 * 3600_000).toISOString().slice(0, 10);
 }
 
 async function column(section: SciSection, limit: number, now: Date): Promise<Row[]> {
   return sql<Row[]>`
     SELECT p.article_id AS id, p.category, p.title, p.summary, p.url, p.tags, p.story_id, p.sort_at,
+      p.published_at, p.original_title, p.reason, s.name AS source_name,
       (SELECT a.output->'layout' FROM analyses a WHERE a.article_id = p.article_id ORDER BY a.id DESC LIMIT 1) AS layout
-    FROM publications p
+    FROM publications p LEFT JOIN sources s ON s.id = p.source_id
     WHERE ${selectedCondition(now)} AND p.category = ${section}
     ORDER BY p.sort_at DESC, p.article_id
     LIMIT ${limit}`;
@@ -154,6 +190,12 @@ function sameEventByWords(a: Row, b: Row, titleCount: (term: string) => number):
 
 /** One item per event across both columns: the newest report stays, in whichever column it was put. */
 export function dedupeEvents(rows: Row[]): Row[] {
+  const keep = new Set(eventGroups(rows).map((g) => g[0]!));
+  return rows.filter((r) => keep.has(r));
+}
+
+/** Reports grouped by event, each group newest first, groups in the order of their newest report. */
+export function eventGroups(rows: Row[]): Row[][] {
   const ordered = [...rows].sort((a, b) => (b.sort_at?.getTime() ?? 0) - (a.sort_at?.getTime() ?? 0));
   const titles = rows.map((r) => squash(r.title));
   const titleCount = (term: string) => titles.filter((t) => t.includes(term)).length;
@@ -174,8 +216,13 @@ export function dedupeEvents(rows: Row[]): Row[] {
     for (let j = i + 1; j < ordered.length; j += 1)
       if (root(i) !== root(j) && sameEventByWords(ordered[i]!, ordered[j]!, titleCount)) join(i, j);
   // The smallest index of a group is its newest report, and every root is the smallest index of its group.
-  const keep = new Set(ordered.filter((_, i) => root(i) === i));
-  return rows.filter((r) => keep.has(r));
+  const groups = new Map<number, Row[]>();
+  ordered.forEach((r, i) => {
+    const g = groups.get(root(i));
+    if (g) g.push(r);
+    else groups.set(root(i), [r]);
+  });
+  return [...groups.values()];
 }
 
 /** Five per column on the homepage; up to `limit` per column for the column pages, the flip deck and search. */
@@ -189,4 +236,72 @@ export async function loadSciHome(limit = 60, now = new Date()): Promise<SciHome
     all: [...frontier, ...practice],
     generatedAt: now.toISOString(),
   };
+}
+
+/** Everything selected in the two columns, newest first: the pool the search and the item pages read. */
+async function pool(now: Date): Promise<Row[]> {
+  const [f, p] = await Promise.all([column("frontier", 1000, now), column("practice", 1000, now)]);
+  return [...f, ...p].sort((a, b) => (b.sort_at?.getTime() ?? 0) - (a.sort_at?.getTime() ?? 0));
+}
+
+const STOP_GRAMS = new Set(["怎么", "什么", "如何", "一下", "可以", "我想", "哪些", "这个", "一个"]);
+
+/** The words a search looks through, lower case. */
+function haystack(r: Row): string {
+  const it = toSciItem(r);
+  return `${it.title} ${it.sum} ${it.name} ${it.line} ${it.take} ${it.kw}`.toLowerCase();
+}
+
+/**
+ * The homepage search over every selected item instead of the newest 120: whole words first, and when
+ * none matches, two-character pieces of the Chinese (the rule the homepage applies in the browser).
+ * One item per event, newest first.
+ */
+export function searchRows(rows: Row[], q: string): Row[] {
+  const terms = q.trim().toLowerCase().split(/[\s，,。、]+/).filter(Boolean);
+  if (!terms.length) return [];
+  const kept = dedupeEvents(rows).sort((a, b) => (b.sort_at?.getTime() ?? 0) - (a.sort_at?.getTime() ?? 0));
+  const hits = kept.filter((r) => { const h = haystack(r); return terms.some((t) => h.includes(t)); });
+  if (hits.length) return hits;
+  const grams = terms.flatMap((t) => {
+    const han = t.replace(/[^一-鿿]/g, "");
+    return Array.from({ length: Math.max(0, han.length - 1) }, (_, i) => han.slice(i, i + 2));
+  }).filter((g) => !STOP_GRAMS.has(g));
+  return kept
+    .map((r) => { const h = haystack(r); return { r, n: grams.filter((g) => h.includes(g)).length }; })
+    .filter((x) => x.n > 0)
+    .sort((a, b) => b.n - a.n)
+    .map((x) => x.r);
+}
+
+export async function searchSci(q: string, now = new Date()): Promise<SciSearch> {
+  const query = q.trim().slice(0, 60);
+  const items = query ? searchRows(await pool(now), query).slice(0, 200).map(toSciItem) : [];
+  return { q: query, items, generatedAt: now.toISOString() };
+}
+
+/** One item's page: its own fields, the other reports of its event, and the newest of its column. */
+export function itemPage(rows: Row[], id: string): SciItemPage | null {
+  const row = rows.find((r) => r.id === id);
+  if (!row) return null;
+  const group = eventGroups(rows).find((g) => g.includes(row)) ?? [row];
+  const inGroup = new Set(group);
+  const l = row.layout ?? {};
+  const keywords = Array.isArray(l.keywords) ? (l.keywords as unknown[]).map(str).filter(Boolean) : [];
+  const original = str(row.original_title);
+  return {
+    item: {
+      ...toSciItem(row),
+      originalTitle: original !== row.title ? original : "",
+      reason: str(row.reason),
+      source: str(row.source_name),
+      keywords: keywords.slice(0, 8),
+    },
+    timeline: group.length > 1 ? [...group].reverse().map(toSciItem) : [],
+    latest: rows.filter((r) => r.category === row.category && !inGroup.has(r)).slice(0, 3).map(toSciItem),
+  };
+}
+
+export async function loadSciItem(id: string, now = new Date()): Promise<SciItemPage | null> {
+  return itemPage(await pool(now), id);
 }

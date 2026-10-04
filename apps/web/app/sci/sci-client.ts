@@ -2,11 +2,11 @@
 // 逻辑来自定稿原型（claude/sci-homepage-prototype.html），只把内置示例换成了接口数据。
 /* eslint-disable */
 // @ts-nocheck
-import type { SciData } from "./types";
+import type { SciData, SciView } from "./types";
 
 let started = false;
 
-export function initSci(data: SciData) {
+export function initSci(data: SciData, view?: SciView) {
   if (started) return;
   started = true;
 
@@ -32,6 +32,10 @@ export function initSci(data: SciData) {
   var PHRASES=['综述','访谈编码','Lean 证明','课堂规定','新酶','NotebookLM'];
   var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var root=document.documentElement;
+  var VIEW=view||null;
+  if(VIEW)root.classList.add('page-'+VIEW.kind);
+  function itemHref(it){return '/items/'+encodeURIComponent(it.id)}
+  function goSearch(v){v=String(v||'').trim();if(v)location.href='/search?q='+encodeURIComponent(v)}
   function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 
   var night=document.getElementById('night');
@@ -42,9 +46,9 @@ export function initSci(data: SciData) {
 
   function itemHTML(it,lead){return '<article class="sheet'+(lead?' lead':'')+'">'+
         (it.hook?'<div class="vb num"><b>'+it.hook+'</b><span>'+it.unit+'</span></div>':'')+
-        '<h3 class="tab"><a href="'+it.url+'" target="_blank" rel="noopener" title="'+esc(it.sum)+'">'+esc(it.title)+'</a></h3>'+
-        (it.name?'<div class="vc tname"><a href="'+it.url+'" target="_blank" rel="noopener" title="'+esc(it.title)+'">'+esc(it.name)+'</a></div><p class="vc tline">'+esc(it.line)+'</p>'
-          :'<h3 class="vc"><a href="'+it.url+'" target="_blank" rel="noopener" title="'+esc(it.sum)+'">'+esc(it.title).replace(esc(it.mark),'<mark class="hl">'+esc(it.mark)+'</mark>')+'</a></h3><p class="vc take">'+esc(it.take)+'</p>')+
+        '<h3 class="tab"><a href="'+itemHref(it)+'" title="'+esc(it.sum)+'">'+esc(it.title)+'</a></h3>'+
+        (it.name?'<div class="vc tname"><a href="'+itemHref(it)+'" title="'+esc(it.title)+'">'+esc(it.name)+'</a></div><p class="vc tline">'+esc(it.line)+'</p>'
+          :'<h3 class="vc"><a href="'+itemHref(it)+'" title="'+esc(it.sum)+'">'+esc(it.title).replace(esc(it.mark),'<mark class="hl">'+esc(it.mark)+'</mark>')+'</a></h3><p class="vc take">'+esc(it.take)+'</p>')+
         '<button type="button" class="share-i" aria-label="存成分享图" title="存成分享图"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v8M4.8 5.2 8 2l3.2 3.2M3 9.5V13h10V9.5"/></svg></button><i class="vbc arr" aria-hidden="true">↗</i><p class="va">'+esc(it.sum)+'</p><p class="vb take">'+esc(it.take)+'</p>'+
         '<div class="meta va"><a href="'+it.url+'" target="_blank" rel="noopener" title="'+esc(it.host)+'">读原文 ↗</a></div></article>'}
   /* 版面：按行对齐。桌面上前沿第 i 条和实践第 i 条同一行 */
@@ -91,7 +95,7 @@ export function initSci(data: SciData) {
 
   var results=document.getElementById('results'),hits=[];
   function placeResults(){results.style.top=(field.offsetTop+field.offsetHeight+10)+'px'}
-  function jump(c){results.hidden=true;if(!c.el){window.open(c.it.url,'_blank','noopener');return}c.el.scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});c.el.classList.remove('hit');void c.el.offsetWidth;c.el.classList.add('hit')}
+  function jump(c){results.hidden=true;location.href=itemHref(c.it)}
   function search(){
     var v=q.value.trim();
     field.classList.toggle('filled',v.length>0);field.classList.remove('miss');
@@ -121,9 +125,9 @@ export function initSci(data: SciData) {
   q.addEventListener('blur',function(){field.classList.remove('typing')});
   q.addEventListener('keydown',function(e){
     if(e.key==='Escape'){q.value='';search();q.blur()}
-    if(e.key==='Enter'){e.preventDefault();if(!q.value.trim()){q.value=PHRASES[pi];search()}if(hits.length)jump(hits[0])}
+    if(e.key==='Enter'){e.preventDefault();if(!q.value.trim()){q.value=PHRASES[pi];search()}goSearch(q.value)}
   });
-  document.getElementById('go').addEventListener('click',function(){if(!q.value.trim()){q.value=PHRASES[pi];search()}if(hits.length)jump(hits[0]);else q.focus()});
+  document.getElementById('go').addEventListener('click',function(){if(!q.value.trim()){q.value=PHRASES[pi];search()}goSearch(q.value)});
   document.querySelector('.want').addEventListener('click',function(){if(!q.value){q.value=PHRASES[pi];search()}});
   document.addEventListener('click',function(e){if(!results.hidden&&!results.contains(e.target)&&e.target!==q&&!e.target.closest('.go-btn'))results.hidden=true});
 
@@ -346,6 +350,51 @@ export function initSci(data: SciData) {
   }
   board.addEventListener('click',function(e){var b=e.target.closest('.share-i');if(!b)return;e.preventDefault();e.stopPropagation();
     var el=b.closest('.sheet');cards.forEach(function(c){if(c.el===el)shareCard(c.it)})});
+  /* 搜索结果页：两栏列出全部结果，搜索词淡黄标出；小人和眼镜沿用首页 */
+  function hlq(s,terms){var t=esc(s);terms.forEach(function(w){var ew=esc(w);if(!ew)return;var i=t.toLowerCase().indexOf(ew.toLowerCase());if(i>=0&&t.indexOf('<mark')<0)t=t.slice(0,i)+'<mark class="q">'+t.slice(i,i+ew.length)+'</mark>'+t.slice(i+ew.length)});return t}
+  function rowHTML(it,terms){
+    var sub=it.sec==='practice'&&it.line?it.line:it.take;
+    return '<a class="srow" href="'+itemHref(it)+'"><h3>'+hlq(it.title,terms)+'</h3>'+(it.name?'<span class="nm">'+esc(it.name)+'</span>':'')+
+      (sub?'<p>'+hlq(sub,terms)+'</p>':'')+'<span class="src">'+esc(it.host)+(it.date?' · '+esc(it.date):'')+'</span></a>'}
+  function renderSearch(S){
+    var sp=document.getElementById('searchPage');q.value=S.q;field.classList.toggle('filled',!!S.q);
+    var terms=S.q.split(/[\s，,。、]+/).filter(Boolean);
+    if(!S.items.length){
+      field.classList.add('miss');missUntil=Date.now()+4000;setTimeout(function(){field.classList.remove('miss')},4000);
+      sp.innerHTML='<p class="count">'+(S.q?'没找到和「'+esc(S.q)+'」有关的内容。':'想找什么？在上面输入关键词。')+'换个说法试试：'+
+        PHRASES.slice(0,4).map(function(p){return '<a href="/search?q='+encodeURIComponent(p)+'">'+esc(p)+'</a>'}).join('、')+'</p>';return}
+    var F=S.items.filter(function(x){return x.sec==='frontier'}),P=S.items.filter(function(x){return x.sec==='practice'});
+    function col(sec,list){return '<section class="scol '+sec+'"><div class="shead"><h2>'+SECS[sec].name+'</h2><span>'+list.length+' 条</span></div>'+
+      (list.length?list.map(function(it){return rowHTML(it,terms)}).join(''):'<p class="none">这一栏没有相关内容。</p>')+'</section>'}
+    sp.innerHTML='<p class="count">找到 <b>'+S.items.length+'</b> 条：学术前沿 '+F.length+' 条、学术实践 '+P.length+' 条。点任意一条看导读。</p>'+
+      '<div class="stabs" role="tablist"><button type="button" class="on" data-only="">全部 '+S.items.length+'</button><button type="button" data-only="frontier">学术前沿 '+F.length+'</button><button type="button" data-only="practice">学术实践 '+P.length+'</button></div>'+
+      '<div class="scols">'+col('frontier',F)+col('practice',P)+'</div>';
+    sp.querySelector('.stabs').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;
+      [].forEach.call(sp.querySelectorAll('.stabs button'),function(x){x.classList.toggle('on',x===b)});sp.setAttribute('data-only',b.getAttribute('data-only'))});
+  }
+  /* 导读页：一句话、导读、为什么值得看、读原文；旁边是同一事件的来龙去脉和本栏最新 */
+  function renderItem(Pg){
+    var it=Pg.item,sec=it.sec,S=SECS[sec],ip=document.getElementById('itemPage');ip.className='itempage '+sec;
+    var title=esc(it.title);if(it.mark&&sec==='frontier')title=title.replace(esc(it.mark),'<mark class="hl">'+esc(it.mark)+'</mark>');
+    var one=sec==='practice'?(it.line||it.take):it.take;
+    var kick=[S.name,it.source||it.host,it.date].filter(Boolean).map(esc).join(' · ');
+    var main='<article class="imain"><a class="crumb" href="/#all-'+sec+'">← '+S.name+'</a><div class="kick">'+kick+'</div>'+
+      (it.name?'<div class="iname">'+esc(it.name)+'</div>':'')+'<h1>'+title+'</h1>'+(it.originalTitle?'<p class="orig">'+esc(it.originalTitle)+'</p>':'')+
+      (one?'<div class="one"><b>一句话</b><p>'+esc(one)+'</p></div>':'')+
+      (it.sum?'<h2>导读</h2><p class="body">'+esc(it.sum)+'</p>':'')+
+      (it.reason?'<h2>为什么值得看</h2><p class="body">'+esc(it.reason)+'</p>':'')+
+      (it.keywords&&it.keywords.length?'<div class="kws">'+it.keywords.map(function(k){return '<a href="/search?q='+encodeURIComponent(k)+'">'+esc(k)+'</a>'}).join('')+'</div>':'')+
+      '<div class="reads"><a class="readbtn" href="'+esc(it.url)+'" target="_blank" rel="noopener">读原文 ↗ <small>'+esc(it.host)+'</small></a><button type="button" class="share-b">存成分享图</button></div>'+
+      '<p class="disc">导读由 AI 根据原文撰写，以原文为准。</p></article>';
+    var side='<aside class="iside">';
+    if(Pg.timeline.length)side+='<div class="blk"><h3>这件事的来龙去脉 · '+Pg.timeline.length+' 篇</h3><ol class="tl">'+Pg.timeline.map(function(x){var me=x.id===it.id;
+      return '<li'+(me?' class="now"':'')+'><time>'+esc([x.date?x.date.slice(5):'',x.host].filter(Boolean).join(' · '))+'</time>'+(me?'<b>'+esc(x.title)+'</b><span>你正在看</span>':'<a href="'+itemHref(x)+'">'+esc(x.title)+'</a>'+(x.take?'<span>'+esc(x.take)+'</span>':''))+'</li>'}).join('')+'</ol></div>';
+    if(Pg.latest.length)side+='<div class="blk"><h3>'+S.name+' · 最新</h3>'+Pg.latest.map(function(x){return '<a class="mini" href="'+itemHref(x)+'"><b>'+esc(x.name||x.title)+'</b><span>'+esc(x.sec==='practice'&&x.line?x.line:x.take)+'</span></a>'}).join('')+'<a class="allin" href="/#all-'+sec+'">全部'+S.name+' →</a></div>';
+    side+='</aside>';
+    ip.innerHTML='<div class="igrid">'+main+side+'</div>';
+    ip.querySelector('.share-b').addEventListener('click',function(){shareCard(it)});
+    requestAnimationFrame(function(){requestAnimationFrame(function(){ip.classList.add('lit')})});
+  }
   /* 「关于」是同一页里的另一个视图：链接 #about 打开，其他任何位置回到首页 */
   var navAbout=document.getElementById('navAbout');
   var listPage=document.getElementById('listPage'),llist=document.getElementById('llist'),lq=document.getElementById('lq'),listSec=null;
@@ -356,8 +405,9 @@ export function initSci(data: SciData) {
     requestAnimationFrame(function(){requestAnimationFrame(function(){llist.querySelectorAll('.sheet').forEach(function(e){e.classList.add('lit')})})});
   }
   lq.addEventListener('input',renderList);
-  llist.addEventListener('click',function(e){var b=e.target.closest('.share-i');if(!b)return;e.preventDefault();e.stopPropagation();var t=b.closest('.sheet').querySelector('a').getAttribute('href');ALL.forEach(function(it){if(it.url===t)shareCard(it)})});
+  llist.addEventListener('click',function(e){var b=e.target.closest('.share-i');if(!b)return;e.preventDefault();e.stopPropagation();var t=b.closest('.sheet').querySelector('a').getAttribute('href');ALL.forEach(function(it){if(itemHref(it)===t)shareCard(it)})});
   function route(first){
+    if(VIEW){window.scrollTo(0,0);return}
     var about=location.hash==='#about',m=location.hash.match(/^#all-(frontier|practice)$/);
     root.classList.toggle('page-about',about);navAbout.classList.toggle('on',about);
     root.classList.toggle('page-list',!!m);
@@ -368,6 +418,11 @@ export function initSci(data: SciData) {
   }
   window.addEventListener('hashchange',function(){route(false)});
   route(true);
+
+  if(VIEW&&VIEW.kind==='search')renderSearch(VIEW.search);
+  if(VIEW&&VIEW.kind==='item')renderItem(VIEW.page);
+  /* 搜索页和导读页上，页眉页脚里指向首页内部的链接（#about、#all-frontier）回到首页去 */
+  if(VIEW)[].forEach.call(document.querySelectorAll('.top a[href^="#"],.foot a[href^="#"],.aboutpage a[href^="#"]'),function(a){var h=a.getAttribute('href');a.setAttribute('href',h==='#top'?'/':'/'+h)});
 
   root.classList.add('ver-c');
   if(!ALL.length){var fsec=document.querySelector('.flip');if(fsec)fsec.style.display='none'}

@@ -92,8 +92,9 @@ export default function App() {
   useHydratedFlag();
   const { pathname } = useLocation();
   // The admin has its own chrome.
-  // The academic homepage draws its own header and footer.
-  if (pathname === "/" || pathname === "/admin" || pathname.startsWith("/admin/")) return <Outlet />;
+  // The academic pages (homepage, search, item reading pages) draw their own header and footer.
+  const sciPage = pathname === "/" || pathname === "/search" || /^\/items\/[^/]+$/.test(pathname);
+  if (sciPage || pathname === "/admin" || pathname.startsWith("/admin/")) return <Outlet />;
   return (
     <SiteShell changelogVersion={meta.changelogVersion}>
       <Outlet />

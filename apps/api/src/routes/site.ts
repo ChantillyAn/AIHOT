@@ -7,7 +7,7 @@ import { InvalidCursorError } from "@aihot/backend/lib/cursor";
 import { exportMarkdown, loadItemDetail, siteItemDetail } from "@aihot/backend/publication/detail";
 import { loadPool, SearchBusyError } from "@aihot/backend/publication/pool";
 import { loadTimeline } from "@aihot/backend/publication/timeline";
-import { loadSciHome } from "@aihot/backend/publication/sci";
+import { loadSciHome, loadSciItem, searchSci } from "@aihot/backend/publication/sci";
 import { loadStoryFollowups } from "@aihot/backend/publication/followups";
 import { loadDevelopments, loadGroupReports } from "@aihot/backend/publication/groups";
 import { loadTopicTags } from "@aihot/backend/publication/topics";
@@ -92,6 +92,23 @@ export function registerSite(app: FastifyInstance) {
     const data = await loadSciHome(60);
     const { generatedAt: _, ...content } = data;
     return sendJsonWithEtag(req, reply, data, { etagPrefix: "sci", cacheControl: "public, max-age=60, s-maxage=60", etagOf: content });
+  }));
+
+  // The academic site's search page: every selected item, not only the newest the homepage holds.
+  app.get("/api/site/sci/search", siteHandler(async (req, reply) => {
+    const q = looseQuery(req).q ?? "";
+    const data = await searchSci(q);
+    const { generatedAt: _, ...content } = data;
+    return sendJsonWithEtag(req, reply, data, { etagPrefix: "sci-search", cacheControl: "public, max-age=60, s-maxage=60", etagOf: content });
+  }));
+
+  // One item of the academic site: its reading page, the other reports of its event, its column's newest.
+  app.get("/api/site/sci/items/:id", siteHandler(async (req, reply) => {
+    const { id } = req.params as { id: string };
+    if (!/^[a-zA-Z0-9_-]{1,80}$/.test(id)) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found" });
+    const data = await loadSciItem(id);
+    if (!data) return sendProblem(req, reply, { status: 404, code: "not_found", detail: "item not found", cacheControl: "public, max-age=60" });
+    return sendJsonWithEtag(req, reply, data, { etagPrefix: "sci-item", cacheControl: "public, max-age=60, s-maxage=60" });
   }));
 
   app.get("/api/site/timeline", siteHandler(async (req, reply) => {

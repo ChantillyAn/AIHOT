@@ -391,3 +391,79 @@ mark.hl{white-space:nowrap;color:inherit;background:none;padding:0 .06em;margin:
 }
 
 .board .empty{margin:8px 0 0;font-size:14.5px;color:var(--muted)}
+
+/* 搜索结果页（/search）：首页的搜索栏和小人留着，下面两栏列结果 */
+.searchpage,.itempage{display:none}
+.page-search .board,.page-search .flip,.page-search .pile{display:none}
+.page-search .hero{grid-template-columns:minmax(0,1fr);padding-block:40px 0}
+.page-search .ask{max-width:760px;padding-bottom:12px}
+.page-search .searchpage{display:block;padding-block:8px 80px}
+.searchpage .count{margin:0 0 14px;font-size:15px;color:var(--ink-2)}
+.searchpage .count b{color:var(--ink);font-weight:600}
+.searchpage .count a{color:var(--clay);text-decoration:underline 1px;text-underline-offset:5px;margin-inline:2px}
+.stabs{display:flex;gap:24px;margin:0 0 28px;border-bottom:1px solid var(--rule)}
+.stabs button{border:0;background:none;padding:10px 0;font:inherit;font-size:15px;color:var(--muted);cursor:pointer}
+.stabs button:hover{color:var(--ink)}
+.stabs button.on{color:var(--ink);box-shadow:inset 0 -2px var(--clay)}
+.scols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 clamp(36px,3.8vw,52px)}
+.searchpage[data-only="frontier"] .scol.practice,.searchpage[data-only="practice"] .scol.frontier{display:none}
+.searchpage[data-only="frontier"] .scols,.searchpage[data-only="practice"] .scols{grid-template-columns:minmax(0,760px)}
+.shead{display:flex;align-items:baseline;gap:12px;padding-bottom:10px;margin-bottom:6px;border-bottom:1px solid var(--rule)}
+.shead h2{margin:0;font-family:var(--serif);font-weight:600;font-size:24px;letter-spacing:.12em;color:var(--sec)}
+.shead span{font-size:13px;color:var(--muted)}
+.scol .none{font-size:15px;color:var(--muted);padding-block:18px}
+.srow{display:block;color:inherit;text-decoration:none;padding:18px 14px;margin-inline:-14px;border-radius:2px;transition:background-color .25s}
+.srow:hover{background:color-mix(in srgb,var(--sec-paper) 75%,var(--page))}
+.srow h3{margin:0 0 6px;font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.55;text-wrap:pretty}
+.srow p{margin:0 0 6px;font-size:14.5px;line-height:1.8;color:var(--ink-2)}
+.srow .nm{display:inline-block;margin-bottom:6px;padding:0 7px;border:1px solid color-mix(in srgb,var(--sec) 40%,transparent);border-radius:2px;font-size:13px;color:var(--sec)}
+.srow .src{font-size:12.5px;color:var(--muted)}
+mark.q{background:none;color:inherit;box-shadow:inset 0 -.4em color-mix(in srgb,var(--note) 70%,transparent)}
+
+/* 导读页（/items/:id） */
+.page-item .home{display:none}
+.page-item .itempage{display:block;padding-block:40px 80px}
+.igrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:clamp(36px,5vw,72px);align-items:start}
+.imain{max-width:720px}
+.imain .crumb{display:inline-block;margin-bottom:20px;font-size:14px;color:var(--sec);text-decoration:none}
+.imain .crumb:hover{text-decoration:underline;text-underline-offset:4px}
+.imain .kick{margin-bottom:10px;font-size:13.5px;letter-spacing:.06em;color:var(--sec)}
+.imain .iname{margin-bottom:4px;font-family:var(--serif);font-weight:600;font-size:clamp(34px,4vw,46px);line-height:1.2;color:var(--sec)}
+.imain h1{margin:0 0 10px;font-family:var(--serif);font-weight:600;font-size:clamp(26px,3vw,36px);line-height:1.45;letter-spacing:.02em;text-wrap:pretty}
+.imain .orig{margin:0 0 26px;font-size:15px;color:var(--muted);font-style:italic}
+.imain .one{margin-bottom:28px;padding:18px 22px;border-radius:2px;background:var(--sec-paper)}
+.imain .one b{display:block;margin-bottom:4px;font-size:12.5px;font-weight:500;letter-spacing:.14em;color:var(--sec)}
+.imain .one p{margin:0;font-family:var(--serif);font-size:19px;line-height:1.7}
+.imain h2{margin:30px 0 8px;font-family:var(--serif);font-weight:600;font-size:18px;letter-spacing:.08em}
+.imain .body{margin:0;font-size:16.5px;line-height:2;color:var(--ink-2)}
+.imain .kws{display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 30px}
+.imain .kws a{padding:2px 12px;border:1px solid var(--rule-2);border-radius:999px;font-size:13px;color:var(--ink-2);text-decoration:none}
+.imain .kws a:hover{border-color:var(--sec);color:var(--sec)}
+.imain .reads{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px}
+.readbtn{display:inline-flex;align-items:center;gap:10px;padding:13px 22px;border-radius:3px;background:var(--btn);color:var(--btn-ink);font-size:15.5px;text-decoration:none}
+.readbtn:hover{opacity:.88}
+.readbtn small{font-size:13px;opacity:.7}
+.share-b{border:0;background:none;padding:6px 0;font:inherit;font-size:14px;color:var(--ink-2);cursor:pointer;text-decoration:underline 1px;text-underline-offset:6px;text-decoration-color:var(--rule-2)}
+.share-b:hover{color:var(--ink)}
+.imain .disc{margin:16px 0 0;font-size:13px;color:var(--muted)}
+.iside .blk{margin-bottom:40px}
+.iside h3{margin:0 0 16px;font-family:var(--serif);font-weight:600;font-size:16px;letter-spacing:.1em}
+.tl{margin:0;padding:0;list-style:none;border-left:1.5px solid var(--rule-2)}
+.tl li{position:relative;padding:0 0 22px 20px}
+.tl li::before{content:"";position:absolute;left:-6px;top:8px;width:10px;height:10px;border-radius:50%;background:var(--page);border:1.5px solid var(--sec)}
+.tl li.now::before{background:var(--sec)}
+.tl time{display:block;font-size:12.5px;color:var(--muted)}
+.tl a,.tl b{display:block;font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.55;color:var(--ink);text-decoration:none}
+.tl a:hover{color:var(--sec)}
+.tl span{display:block;font-size:12.5px;line-height:1.7;color:var(--muted)}
+.mini{display:block;padding:12px 0;border-top:1px solid var(--rule);color:inherit;text-decoration:none}
+.mini b{display:block;font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.55}
+.mini span{font-size:13px;line-height:1.7;color:var(--ink-2)}
+.mini:hover b{color:var(--sec)}
+.allin{display:inline-block;margin-top:10px;font-size:13.5px;color:var(--sec);text-decoration:none}
+@media (max-width:820px){
+  .scols,.igrid{grid-template-columns:minmax(0,1fr)}
+  .scol.practice{margin-top:28px}
+  .page-item .itempage{padding-block:24px 56px}
+  .imain .one p{font-size:17.5px}
+}

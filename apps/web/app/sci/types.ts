@@ -14,7 +14,33 @@ export interface SciItem {
   line: string;
   /** Search words, space separated. */
   kw: string;
+  /** The source's publication day (YYYY-MM-DD), or "". */
+  date: string;
 }
+
+/** One item on its own reading page. */
+export interface SciItemFull extends SciItem {
+  originalTitle: string;
+  reason: string;
+  source: string;
+  keywords: string[];
+}
+
+export interface SciItemPage {
+  item: SciItemFull;
+  /** Every report of the same event, oldest first, this one included (empty when it stands alone). */
+  timeline: SciItem[];
+  latest: SciItem[];
+}
+
+export interface SciSearch {
+  q: string;
+  items: SciItem[];
+  generatedAt: string;
+}
+
+/** The pages besides the homepage that share its frame. */
+export type SciView = { kind: "search"; search: SciSearch } | { kind: "item"; page: SciItemPage };
 
 export interface SciData {
   /** The newest five of each column, shown on the homepage. */

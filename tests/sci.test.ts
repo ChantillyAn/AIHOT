@@ -77,3 +77,39 @@ test("one event under a Chinese and an English name, or a rare shared word; meth
   ];
   assert.deepEqual(dedupeEvents(rows).map((r) => r.id), ["en", "m1", "l1", "l2", "p1", "p2", "p3"]);
 });
+
+test("search page: whole words first, then two-character pieces; one item per event", async () => {
+  const { searchRows } = await import("../packages/backend/src/publication/sci.ts");
+  const row = (id: string, title: string, kw: string, t: number, category: "frontier" | "practice" = "frontier") =>
+    ({ id, category, title, summary: "", url: "", tags: [], layout: { keywords: kw.split(" ") }, story_id: null, sort_at: new Date(t) });
+  const rows = [
+    row("a", "AI 证明渗流理论猜想", "数学 证明", 5),
+    row("b", "OpenAI 发布纳维-斯托克斯方程 AI 解法", "OpenAI 纳维-斯托克斯方程 Navier-Stokes 千禧年难题 数学", 4),
+    row("c", "专家质疑 OpenAI 未解决真正的 Navier-Stokes 问题", "Navier-Stokes OpenAI 千禧年难题 数学 质疑", 6),
+    row("d", "高校课堂 AI 规定", "教学 规定", 3, "practice"),
+  ];
+  assert.deepEqual(searchRows(rows, "数学").map((r) => r.id), ["c", "a"], "the Navier-Stokes reports count once, the newest");
+  assert.deepEqual(searchRows(rows, "课堂教学怎么办").map((r) => r.id), ["d"], "no whole-word hit: pieces of the Chinese");
+  assert.deepEqual(searchRows(rows, "   "), []);
+});
+
+test("item page: the event's reports oldest first, the column's newest without them", async () => {
+  const { itemPage } = await import("../packages/backend/src/publication/sci.ts");
+  const row = (id: string, title: string, kw: string, t: number, category: "frontier" | "practice" = "frontier") =>
+    ({ id, category, title, summary: "摘要。", url: `https://example.org/${id}`, tags: [], layout: { keywords: kw.split(" "), take: `${id} 要点` },
+      story_id: null, sort_at: new Date(Date.UTC(2026, 8, t)), published_at: new Date(Date.UTC(2026, 8, t)), original_title: `Original ${id}`, reason: "值得看。", source_name: "源" });
+  const rows = [
+    row("n", "最新的一条", "其他", 30),
+    row("c", "专家质疑 OpenAI 未解决真正的 Navier-Stokes 问题", "Navier-Stokes OpenAI 千禧年难题 数学 质疑", 22),
+    row("b", "OpenAI 发布纳维-斯托克斯方程 AI 解法", "OpenAI 纳维-斯托克斯方程 Navier-Stokes 千禧年难题 数学", 8),
+    row("p", "实践栏的一条", "教学", 29, "practice"),
+  ];
+  const page = itemPage(rows, "c")!;
+  assert.equal(page.item.originalTitle, "Original c");
+  assert.equal(page.item.reason, "值得看。");
+  assert.equal(page.item.date, "2026-09-22");
+  assert.deepEqual(page.timeline.map((x) => x.id), ["b", "c"]);
+  assert.deepEqual(page.latest.map((x) => x.id), ["n"]);
+  assert.deepEqual(itemPage(rows, "n")!.timeline, [], "an item alone has no timeline");
+  assert.equal(itemPage(rows, "missing"), null);
+});
