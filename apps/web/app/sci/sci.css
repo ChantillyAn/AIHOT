@@ -467,3 +467,11 @@ mark.q{background:none;color:inherit;box-shadow:inset 0 -.4em color-mix(in srgb,
   .page-item .itempage{padding-block:24px 56px}
   .imain .one p{font-size:17.5px}
 }
+
+/* 时效：卡片上的日期、首页的最近更新 */
+.sheet .when{position:relative;z-index:1;margin:8px 0 0;font-size:12.5px;line-height:1.5;letter-spacing:.02em;color:var(--muted)}
+.sheet.lead .when{font-size:13px}
+.face.front p.when{margin:10px 0 0;font-size:12.5px;color:#75706a;-webkit-line-clamp:1}
+.fresh{display:flex;align-items:center;gap:8px;margin:0;font-size:13.5px;color:var(--muted)}
+.fresh i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--moss);box-shadow:0 0 0 3px color-mix(in srgb,var(--moss) 18%,transparent)}
+.fresh span{opacity:.8}

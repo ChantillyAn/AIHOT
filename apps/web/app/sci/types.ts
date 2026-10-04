@@ -47,5 +47,7 @@ export interface SciData {
   home: SciItem[];
   /** Everything recent, for the column pages, the flip deck and search. */
   all: SciItem[];
+  /** When the newest item reached the site (ISO), or "". */
+  updatedAt: string;
   generatedAt: string;
 }

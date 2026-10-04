@@ -48,6 +48,8 @@ export interface SciSearch {
 export interface SciHome {
   home: SciItem[];
   all: SciItem[];
+  /** When the newest item reached the site (ISO), or "" before the first one. */
+  updatedAt: string;
   generatedAt: string;
 }
 
@@ -234,6 +236,7 @@ export async function loadSciHome(limit = 60, now = new Date()): Promise<SciHome
   return {
     home: [...frontier.slice(0, 5), ...practice.slice(0, 5)],
     all: [...frontier, ...practice],
+    updatedAt: kept.reduce<Date | null>((m, r) => (r.sort_at && (!m || r.sort_at > m) ? r.sort_at : m), null)?.toISOString() ?? "",
     generatedAt: now.toISOString(),
   };
 }
